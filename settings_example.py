@@ -1,4 +1,3 @@
-# RENAME THIS FILE settings.py BEFORE RUNNING main.py
 from multiprocessing import cpu_count
 import csv
 
@@ -26,6 +25,13 @@ room_antireqest_csv_path = "antirequests.csv"
 
 # Manual variable import settings can be found at the bottom of this file
 
+
+# Manual pair score setting
+# Allows you to manually set the score between any 2 students
+# Student names must be in python ascii order
+# Should be a list of tuple pairs to weights (positive or negative)
+room_pairs = {}
+
 # CPU Cores used
 # This program will use ALL of your CPU power on the machine if allowed.
 # Default: cpu_count() + 1
@@ -37,7 +43,7 @@ cpu_cores = cpu_count() + 1
 # Basically, the program has an element of randomness when it comes to finding optimal rooms
 # The more iterations, the more likely the program will find a more optimal iteration, but the longer it takes
 # The time the program takes to complete is linearly related to the number of iterations, but the number of iterations
-# on average to find a better room increases exponentially with more iterations
+# on average to find a better room increases exponentially
 number_of_iterations = 500
 
 # Random seed start
@@ -49,7 +55,7 @@ seeding_random_seed = -1
 # Request "weights"
 # For each "pair", this is how many points the first, second, third, etc request gets.
 # A "no match" weight is -1000000, aka will never match
-room_pair_weights = [150, 25, 16, 14, 12, 10, 8, 6, 4, 2]
+room_pair_weights = [300, 100, 16, 14, 12, 10, 8, 6, 4, 2]
 
 # Number of students per room
 students_per_room = 6
