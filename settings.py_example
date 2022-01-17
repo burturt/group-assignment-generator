@@ -1,3 +1,4 @@
+# RENAME THIS FILE settings.py BEFORE RUNNING main.py
 from multiprocessing import cpu_count
 import csv
 
@@ -27,17 +28,17 @@ room_antireqest_csv_path = "antirequests.csv"
 
 # CPU Cores used
 # This program will use ALL of your CPU power on the machine if allowed.
-# Default: cpu_count()
+# Default: cpu_count() + 1
 # This will use all of your computer's cpu to minimize runtime, but your computer may lag until completion
 # Consider using cpu_count() - 2 if you want to leave it running in the background
-cpu_cores = cpu_count() * 10
+cpu_cores = cpu_count() + 1
 
 # Number of iterations
 # Basically, the program has an element of randomness when it comes to finding optimal rooms
 # The more iterations, the more likely the program will find a more optimal iteration, but the longer it takes
 # The time the program takes to complete is linearly related to the number of iterations, but the number of iterations
 # on average to find a better room increases exponentially with more iterations
-number_of_iterations = 100
+number_of_iterations = 500
 
 # Random seed start
 # Used to feed into the random number generator
