@@ -19,7 +19,7 @@ def main():
     # Run algorithm 100 times, select best result
     highest_score = 0
     best_arrangement = []
-    with Pool(10) as pool:
+    with Pool(settings.cpu_cores) as pool:
         results = []
 
         for i in range(settings.number_of_iterations):
