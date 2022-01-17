@@ -17,9 +17,8 @@ def get_antirequests():
 def main():
     room_pairs = calculate_pairing_happiness()
     # Run algorithm 100 times, select best result
-    result = generate_new_rooms(room_pairs)
-    highest_score = result[0]
-    best_arrangement = result[1]
+    highest_score = 0
+    best_arrangement = []
     with Pool(10) as pool:
         results = []
 
@@ -31,6 +30,7 @@ def main():
             #    highest_score = current_score
         pool.close()
         pool.join()
+    count = 0
     for result in results:
         final_result = result.get()
         if highest_score < final_result[0]:
