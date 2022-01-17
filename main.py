@@ -1,8 +1,11 @@
-from multiprocessing import Pool, cpu_count
+from multiprocessing import Pool
 import random
 from datetime import datetime
 from math import ceil
 import settings
+from pathlib import Path
+import shutil
+import sys
 
 def get_antirequests():
     room_antirequests_sorted = []
@@ -24,10 +27,6 @@ def main():
 
         for i in range(settings.number_of_iterations):
             results.append(pool.apply_async(generate_new_rooms, args=[room_pairs, settings.seeding_random_seed + i if settings.seeding_random_seed != -1 else -1]))
-            #current_score = rooms[0]
-            #if (highest_score < current_score):
-            #    best_arrangement = rooms[1]
-            #    highest_score = current_score
         pool.close()
         pool.join()
     count = 0
@@ -39,12 +38,32 @@ def main():
     fancy_print_rooms(best_arrangement)
     print(calculate_room_happiness(best_arrangement, room_pairs))
 
+    # Save input and output in new output directory
+    output_dir = Path("room-runs")
+    if not output_dir.exists():
+        output_dir.mkdir()
+    directory_name = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    run_output_dir = Path("room-runs/" + directory_name)
+    run_output_dir.mkdir()
+
+    settings_file = Path("settings.py")
+    destination_settings = run_output_dir / "settings.py"
+    shutil.copy(settings_file, destination_settings)
+    if settings.use_csv_importer:
+        input_requests = Path(settings.room_request_csv_path)
+        destination_input_requests = run_output_dir / "requests.csv"
+        input_antirequests = Path(settings.room_antireqest_csv_path)
+        destination_input_antirequests = run_output_dir / "antirequests.csv"
+        shutil.copy(input_requests, destination_input_requests)
+        shutil.copy(input_antirequests, destination_input_antirequests)
+
+
 def calculate_pairing_happiness():
     room_pairs = {}
     antirequests = get_antirequests()
     for student, requests in settings.room_requests.items():
         if not requests:
-            continue;
+            continue
         priority_weight = requests[0]
         ranked_list = requests[1:]
         for i in range(len(ranked_list)):
@@ -133,6 +152,9 @@ def fancy_print_rooms(rooms):
         print(sorted(room))
 
 if __name__ == "__main__":
+    # Verify proper python version
+    if not sys.version_info.major == 3 and sys.version_info.minor == 8:
+        print("This script is tested on python 3.8 ONLY. You are currently running " + sys.version())
     # Calculate runtime
     start = datetime.now()
     print("Started at: " + str(start))
