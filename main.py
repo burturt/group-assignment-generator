@@ -46,6 +46,9 @@ def main():
     print(calculate_room_happiness(best_arrangement_sorted, room_pairs))
     individual_happiness = calculate_individual_happiness(best_arrangement_sorted)
 
+    for student in individual_happiness:
+        print(student[0] + ": " + str(student[1]) + "/" + str(student[2]))
+
     # Save input and output in new output directory
     output_dir = Path("room-runs")
     if not output_dir.exists():
@@ -71,6 +74,7 @@ def main():
     output_file_pref = run_output_dir / ("individual_scores.csv")
     with open(output_file_pref, "w+") as output_csv:
         writer = csv.writer(output_csv, delimiter=",")
+        writer.writerow(["Student", "Individual unweighted happiness", "Total possible happiness"])
         writer.writerows(individual_happiness)
 
 
@@ -79,6 +83,7 @@ def calculate_pairing_happiness():
 
     antirequests = get_antirequests()
     for student, requests in settings.room_requests.items():
+        multiplier = 10 / len(settings.room_requests[student])
         if not requests:
             continue
         priority_weight = requests[0]
@@ -90,9 +95,9 @@ def calculate_pairing_happiness():
                 student1, student2 = student2, student1
             if (student1, student2) in room_pairs:
                 room_pairs[(student1, student2)] += settings.room_pair_weights[
-                                                        i] + priority_weight + settings.mutual_request_bonus
+                                                        i] * multiplier + priority_weight + settings.mutual_request_bonus
             else:
-                room_pairs[(student1, student2)] = settings.room_pair_weights[i] + priority_weight
+                room_pairs[(student1, student2)] = settings.room_pair_weights[i] * multiplier + priority_weight
     print("Students found:")
     for student1 in get_students():
         print(student1)
@@ -125,6 +130,16 @@ def calculate_room_happiness(rooms, room_pairs):
                     student1, student2 = student2, student1
                 room_happiness += room_pairs.get((student1, student2), 0)
                 j += 1
+        # Add negative scores to every student who doesn't have anyone they like
+        # Disabled due to inefficiency - revisit sometime?
+        # for student in get_students():
+        #    if student == "":
+        #        continue
+        #    happiness, total_possible = calculate_student_individual_happiness(student, room)
+        #    if happiness == 0 and total_possible != 0:
+        #        room_happiness -= 100
+        #        print(student)
+
 
     return room_happiness
 
@@ -184,21 +199,25 @@ def calculate_individual_happiness(rooms):
         for student in room:
             if student.startswith("ZZEMPTY"):
                 continue
-            student_choices = room_requests[student]
-            student_choices.pop(0)
-            happiness = 0
-            i = 0
-            while i < len(student_choices):
-                if student_choices[i] == "":
-                    student_choices.pop(i)
-                    continue
-                if student_choices[i] in room:
-                    happiness += settings.room_pair_weights[i]
-                i += 1
-            output_array.append([student, happiness, str(sum(settings.room_pair_weights[0:len(student_choices)]))])
-            print(student + ": " + str(happiness) + "/" + str(sum(settings.room_pair_weights[0:len(student_choices)])))
+            happiness, total_possible = calculate_student_individual_happiness(student, room, room_requests)
+            output_array.append([student, happiness, total_possible])
 
     return output_array
+
+def calculate_student_individual_happiness(student, room, room_requests = settings.room_requests):
+    student_choices = room_requests[student][1:]
+    happiness = 0
+    total_possible = 0
+    i = 0
+    while i < len(student_choices):
+        if student_choices[i] == "":
+            i += 1
+            continue
+        total_possible += settings.room_pair_weights[i]
+        if student_choices[i] in room:
+            happiness += settings.room_pair_weights[i]
+        i += 1
+    return (happiness, total_possible)
 
 if __name__ == "__main__":
     # Verify proper python version
